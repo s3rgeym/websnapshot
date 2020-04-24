@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "websnapshot"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 authors = ["Sergey M <tz4678@gmail.com>"]
 readme = "README.md"
@@ -15,10 +15,10 @@ pyppeteer = "^0.0.25"
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 pylint = "^2.4.4"
-
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+black = {version = "^19.10b0", allow-prereleases = true}
 
 [tool.poetry.scripts]
 websnapshot = "websnapshot:websnapshot"
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

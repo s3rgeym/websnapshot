@@ -4,15 +4,15 @@
 # install
 $ pip install websnapshot
 
-# better install
+# install in isolated environment
 $ pipx install websnapshot
 
-# from stdout
-$ echo 'https://stackoverflow.com/' | websnapshot
+# full page snapshot
+$ echo 'https://stackoverflow.com/' | websnapshot -f t
 
 # text file with urls
 $ websnapshot -i urls.txt
 
-# usage
+# help
 $ websnapshot --help
 ```
