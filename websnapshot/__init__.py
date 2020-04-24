@@ -101,7 +101,8 @@ def websnapshot(
     logging.basicConfig()
     if debug:
         log.setLevel(level=logging.DEBUG)
-    log.debug('viewport size: %s', viewport_size)
+    log.info('viewport size: %s', viewport_size)
+    log.info('full page: %s', full_page)
     urls = asyncio.Queue()
     for url in input.read().splitlines():
         urls.put_nowait(url)
