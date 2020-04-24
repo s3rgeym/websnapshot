@@ -1,4 +1,5 @@
 /.vscode
 /dist
-/websnapshot/websnapshot
+/*.egg-info
+/websnapshot/websnapshots
 __pycache__
