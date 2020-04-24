@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "websnapshot"
+version = "0.1.2"
+description = ""
+authors = ["Sergey M <tz4678@gmail.com>"]
+readme = "README.md"
+homepage = ""
+exclude = [".git", "websnapshot/websnapshots"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^7.1.1"
+pyppeteer = "^0.0.25"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pylint = "^2.4.4"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry.scripts]
+websnapshot = "websnapshot:websnapshot"
