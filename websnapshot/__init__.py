@@ -2,20 +2,23 @@ import asyncio
 import logging
 import pathlib
 import sys
+from functools import partial
 from typing import TextIO, Tuple
 
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 log = logging.getLogger(__name__)
+click.option = partial(click.option, show_default=True)
 
 
-def filename_from_url(url: str) -> str:
+def imagename_from_url(url: str) -> str:
     return (
         url.replace('://', '_').replace('/', '_').replace('.', '_').rstrip('_')
+        + '.png'
     )
 
 
@@ -39,9 +42,7 @@ async def worker(
                 await page.setViewport(viewport)
                 await page.goto(url)
                 await asyncio.sleep(pageload_timeout)
-                filename = output_dirname.joinpath(
-                    filename_from_url(url) + '.png'
-                )
+                filename = output_dirname.joinpath(imagename_from_url(url))
                 log.debug("save snapshot %s", filename)
                 await page.screenshot({'path': filename, 'fullPage': full_page})
                 await page.close()
