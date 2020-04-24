@@ -61,7 +61,7 @@ def validate_viewport_size(ctx, param, value) -> Tuple[int, int]:
 
 @click.command(help="take snapshot of webpage")
 @click.option(
-    '-i', '--input', help="input filename", type=click.File("r+"), default="-"
+    '-i', '--input', help="input filename", type=click.File('r+'), default='-'
 )
 @click.option(
     '-o',
@@ -81,7 +81,7 @@ def validate_viewport_size(ctx, param, value) -> Tuple[int, int]:
     default='1366x768',
 )
 @click.option(
-    '-f', '--full_page', help="full page snapshot", default=False,
+    '-f', '--full_page', help="full page snapshot", type=bool, default=False,
 )
 @click.option(
     '-t', '--pageload_timeout', help="page load timeout", type=float, default=3
