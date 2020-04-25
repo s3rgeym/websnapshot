@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "websnapshot"
-version = "0.1.4"
-description = ""
+version = "0.1.5"
+description = "take snapshot of webpage"
 authors = ["Sergey M <yamldeveloper@proton.me>"]
 readme = "README.md"
-homepage = ""
+homepage = "https://github.com/s3rgeym/websnapshot"
 exclude = [".git", "websnapshot/websnapshots"]
 
 [tool.poetry.dependencies]
