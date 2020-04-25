@@ -1,25 +1,26 @@
 import asyncio
 import logging
 import pathlib
+import re
 import sys
 from functools import partial
 from typing import TextIO, Tuple
+from urllib.parse import unquote
 
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
+# Символы запрещенные в именах файлов в Linux, Mac и Windows
+UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
 
 log = logging.getLogger(__name__)
 click.option = partial(click.option, show_default=True)
 
 
 def imagename_from_url(url: str) -> str:
-    return (
-        url.replace('://', '_').replace('/', '_').replace('.', '_').rstrip('_')
-        + '.png'
-    )
+    return UNSAFE_CHARACTERS.sub('_', unquote(url)) + '.png'
 
 
 async def worker(
@@ -102,15 +103,15 @@ def websnapshot(
     logging.basicConfig()
     if debug:
         log.setLevel(level=logging.DEBUG)
-    log.info('viewport size: %s', viewport_size)
-    log.info('full page: %s', full_page)
+    log.info("viewport size: %s", viewport_size)
+    log.info("full page: %s", full_page)
     urls = asyncio.Queue()
     for url in input.read().splitlines():
         urls.put_nowait(url)
-    output_dirname = pathlib.Path(__file__).parent.joinpath(output).resolve()
+    output_dirname = pathlib.Path(output).expanduser().resolve()
     output_dirname.mkdir(parents=True, exist_ok=True)
-    N = min(urls.qsize(), worker_num)
-    sem = asyncio.Semaphore(N)
+    n = min(urls.qsize(), worker_num)
+    sem = asyncio.Semaphore(n)
     tasks = [
         asyncio.ensure_future(
             worker(
@@ -122,7 +123,7 @@ def websnapshot(
                 pageload_timeout=pageload_timeout,
             )
         )
-        for _ in range(N)
+        for _ in range(n)
     ]
     _ = asyncio.get_event_loop().run_until_complete(
         asyncio.gather(*tasks, return_exceptions=True)
