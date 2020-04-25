@@ -11,7 +11,7 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 # Символы запрещенные в именах файлов в Linux, Mac и Windows
 UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
@@ -99,7 +99,7 @@ def headers_cb(
     ctx: click.Context, param: click.Option, value: List[str]
 ) -> Dict[str, str]:
     try:
-        return dict(v.split(':', 1) for v in value)
+        return dict(map(str.strip, header.split(':', 1)) for header in value)
     except ValueError:
         raise click.BadParameter("bad header")
 
@@ -178,6 +178,7 @@ def websnapshot(
     logging.basicConfig()
     log.setLevel(level=log_level)
     log.info("viewport size: %s", viewport_size)
+    log.info("headers: %s", headers)
     log.info("full page: %s", full_page)
     urls = asyncio.Queue()
     for url in input.read().splitlines():
