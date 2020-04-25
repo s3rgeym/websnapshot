@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "websnapshot"
-version = "0.1.5"
+version = "0.1.6"
 description = "take snapshot of webpage"
 authors = ["Sergey M <tz4678@gmail.com>"]
 readme = "README.md"

@@ -10,7 +10,7 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 # Символы запрещенные в именах файлов в Linux, Mac и Windows
 UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
@@ -19,8 +19,8 @@ log = logging.getLogger(__name__)
 click.option = partial(click.option, show_default=True)
 
 
-def imagename_from_url(url: str) -> str:
-    return UNSAFE_CHARACTERS.sub('_', unquote(url)) + '.png'
+def filename_from_url(url: str, extension: str) -> str:
+    return UNSAFE_CHARACTERS.sub('_', unquote(url)) + extension
 
 
 async def worker(
@@ -28,9 +28,11 @@ async def worker(
     sem: asyncio.Semaphore,
     urls: asyncio.Queue,
     output_dirname: pathlib.Path,
-    viewport_size: Tuple[int, int],
+    viewport: Tuple[int, int],
     full_page: bool,
-    pageload_timeout: float,
+    quality: int,
+    extension: str,
+    timeout: float,
 ) -> None:
     log.info("worker started")
     browser = await launch()
@@ -39,13 +41,21 @@ async def worker(
             try:
                 url = await urls.get()
                 page = await browser.newPage()
-                viewport = dict(zip(('width', 'height'), viewport_size))
-                await page.setViewport(viewport)
+                viewport_ = dict(zip(('width', 'height'), viewport))
+                await page.setViewport(viewport_)
                 await page.goto(url)
-                await asyncio.sleep(pageload_timeout)
-                filename = output_dirname.joinpath(imagename_from_url(url))
-                log.debug("save snapshot %s", filename)
-                await page.screenshot({'path': filename, 'fullPage': full_page})
+                await asyncio.sleep(timeout)
+                filename = output_dirname.joinpath(
+                    filename_from_url(url, extension)
+                )
+                log.debug("save snapshot as %s", filename)
+                await page.screenshot(
+                    {
+                        'path': filename,
+                        'fullPage': full_page,
+                        'quality': quality,
+                    }
+                )
                 await page.close()
             finally:
                 urls.task_done()
@@ -53,12 +63,12 @@ async def worker(
     log.info("worker finished")
 
 
-def validate_viewport_size(ctx, param, value) -> Tuple[int, int]:
+def validate_viewport(ctx, param, value) -> Tuple[int, int]:
     try:
         width, height = map(int, value.split('x'))
         return (width, height)
     except ValueError:
-        raise click.BadParameter("viewport_size: WIDTHxHEIGHT")
+        raise click.BadParameter("viewport: WIDTHxHEIGHT")
 
 
 @click.command(help="take snapshot of webpage")
@@ -77,33 +87,44 @@ def validate_viewport_size(ctx, param, value) -> Tuple[int, int]:
 )
 @click.option(
     '-s',
-    '--viewport_size',
+    '--viewport',
     help="viewport size",
-    callback=validate_viewport_size,
+    type=str,
+    callback=validate_viewport,
     default='1366x768',
 )
+@click.option('-f', '--full_page', help="full page snapshot", is_flag=True)
 @click.option(
-    '-f', '--full_page', help="full page snapshot", type=bool, default=False,
+    '-q', '--quality', help="snapshot quality (1-100)", type=int, default=85
 )
 @click.option(
-    '-t', '--pageload_timeout', help="page load timeout", type=float, default=3
+    '-e', '--extension', '--ext', help="snapshot extension", default='.png'
 )
 @click.option(
-    '-d', '--debug', help="enable debug mode", type=bool, default=False
+    '-t', '--timeout', help="page load timeout", type=float, default=3.0
+)
+@click.option(
+    '-l',
+    '--log_level',
+    help="logging level",
+    type=str,
+    callback=lambda ctx, param, value: value.upper(),
+    default='info',
 )
 def websnapshot(
     input: TextIO,
     output: str,
     worker_num: int,
-    viewport_size: Tuple[int, int],
+    viewport: Tuple[int, int],
     full_page: bool,
-    pageload_timeout: float,
-    debug: bool,
+    quality: int,
+    extension: str,
+    timeout: float,
+    log_level: str,
 ) -> None:
     logging.basicConfig()
-    if debug:
-        log.setLevel(level=logging.DEBUG)
-    log.info("viewport size: %s", viewport_size)
+    log.setLevel(level=log_level)
+    log.info("viewport size: %s", viewport)
     log.info("full page: %s", full_page)
     urls = asyncio.Queue()
     for url in input.read().splitlines():
@@ -118,9 +139,11 @@ def websnapshot(
                 sem=sem,
                 urls=urls,
                 output_dirname=output_dirname,
-                viewport_size=viewport_size,
+                viewport=viewport,
                 full_page=full_page,
-                pageload_timeout=pageload_timeout,
+                quality=quality,
+                extension=extension,
+                timeout=timeout,
             )
         )
         for _ in range(n)
