@@ -11,7 +11,7 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 # Символы запрещенные в именах файлов в Linux, Mac и Windows
 UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
@@ -41,7 +41,7 @@ async def worker(
     quality: int,
     extension: str,
     delay: float,
-    timeout: float
+    timeout: float,
 ) -> None:
     log.info("worker started")
     browser = await launch()
@@ -104,7 +104,22 @@ def headers_cb(
         raise click.BadParameter("bad header")
 
 
-@click.command(help="take snapshot of webpage")
+def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(click.style(f'Version: {__version__}', fg='yellow'))
+    ctx.exit()
+
+
+@click.command(help="capture snapshot of webpage")
+@click.option(
+    '-v',
+    '--version',
+    is_flag=True,
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
+)
 @click.option(
     '-i', '--input', help="input filename", type=click.File('r+'), default='-'
 )
