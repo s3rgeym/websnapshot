@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "websnapshot"
-version = "0.1.11"
+version = "0.1.12"
 description = "Python command-line tool for capture snapshots of web pages using Headless Chromium."
 authors = ["Sergey M <yamldeveloper@proton.me>"]
 readme = "README.md"
