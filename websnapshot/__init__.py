@@ -11,13 +11,13 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 
 # Символы запрещенные в именах файлов в Linux, Mac и Windows
 UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
 
 log = logging.getLogger(__name__)
-click.option = partial(click.option, show_default=True)
+option = partial(click.option, show_default=True)
 
 
 def filename_from_url(url: str, extension: str) -> str:
@@ -111,17 +111,26 @@ def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
 
 @click.command(help="capture snapshot of webpage")
 @click.option(
+    '-v',
+    '--version',
+    help="print version",
+    is_flag=True,
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
+)
+@option(
     '-i', '--input', help="input filename", type=click.File('r+'), default='-'
 )
-@click.option(
+@option(
     '-o',
     '--output',
     help="snapshot output directory",
     type=click.Path(),
     default='./websnapshots',
 )
-@click.option('-w', '--workers', help="number of workers", type=int, default=10)
-@click.option(
+@option('-w', '--workers', help="number of workers", type=int, default=10)
+@option(
     '-V',
     '--viewport_size',
     help="viewport size",
@@ -129,7 +138,7 @@ def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
     callback=viewport_size_cb,
     default='1366x768',
 )
-@click.option(
+@option(
     '-H',
     '--header',
     'headers',
@@ -138,44 +147,32 @@ def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
     callback=headers_cb,
     multiple=True,
 )
-@click.option('-f', '--full_page', help="full page snapshot", is_flag=True)
-@click.option(
+@option('-f', '--full_page', help="full page snapshot", is_flag=True)
+@option(
     '-q', '--quality', help="snapshot quality (1-100)", type=int, default=85,
 )
-@click.option(
-    '-e', '--extension', '--ext', help="snapshot extension", default='.png'
-)
-@click.option(
+@option('-e', '--extension', '--ext', help="snapshot extension", default='.png')
+@option(
     '-d',
     '--delay',
     help="delay after page load in seconds",
     type=float,
     default=5.0,
 )
-@click.option(
+@option(
     '-t',
     '--timeout',
     help="maximum navigation timeout in seconds",
     type=float,
     default=15.0,
 )
-@click.option(
+@option(
     '-l',
     '--log_level',
     help="logging level",
     type=str,
     callback=lambda ctx, param, value: value.upper(),
     default='warning',
-)
-@click.option(
-    '-v',
-    '--version',
-    help="print version",
-    is_flag=True,
-    callback=print_version,
-    expose_value=False,
-    is_eager=True,
-    show_default=False,
 )
 def websnapshot(
     input: TextIO,
