@@ -111,14 +111,6 @@ def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
 
 @click.command(help="capture snapshot of webpage")
 @click.option(
-    '-v',
-    '--version',
-    is_flag=True,
-    callback=print_version,
-    expose_value=False,
-    is_eager=True,
-)
-@click.option(
     '-i', '--input', help="input filename", type=click.File('r+'), default='-'
 )
 @click.option(
@@ -174,6 +166,15 @@ def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
     type=str,
     callback=lambda ctx, param, value: value.upper(),
     default='warning',
+)
+@click.option(
+    '-v',
+    '--version',
+    help="print version",
+    is_flag=True,
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
 )
 def websnapshot(
     input: TextIO,
