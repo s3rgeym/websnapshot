@@ -11,17 +11,14 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.13'
-
-# Символы запрещенные в именах файлов в Linux, Mac и Windows
-UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
+__version__ = '0.1.14'
 
 log = logging.getLogger(__name__)
 option = partial(click.option, show_default=True)
 
 
 def filename_from_url(url: str, extension: str) -> str:
-    return UNSAFE_CHARACTERS.sub('_', unquote(url)) + extension
+    return re.sub(r'\W+', '_', unquote(url)).rstrip('_') + extension
 
 
 @dataclass
