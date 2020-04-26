@@ -11,7 +11,7 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 # Символы запрещенные в именах файлов в Linux, Mac и Windows
 UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
@@ -43,7 +43,6 @@ async def worker(
     delay: float,
     timeout: float,
 ) -> None:
-    log.info("worker started")
     browser = await launch()
     while not urls.empty():
         async with sem:
@@ -82,7 +81,6 @@ async def worker(
             finally:
                 urls.task_done()
     await browser.close()
-    log.info("worker finished")
 
 
 def viewport_size_cb(
@@ -107,7 +105,7 @@ def headers_cb(
 def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
     if not value or ctx.resilient_parsing:
         return
-    click.echo(click.style(f'Version: {__version__}', fg='yellow'))
+    click.echo(f'Version: {__version__}')
     ctx.exit()
 
 
@@ -192,9 +190,6 @@ def websnapshot(
 ) -> None:
     logging.basicConfig()
     log.setLevel(level=log_level)
-    log.info("viewport size: %s", viewport_size)
-    log.info("headers: %s", headers)
-    log.info("full page: %s", full_page)
     urls = asyncio.Queue()
     for url in input.read().splitlines():
         urls.put_nowait(url)
