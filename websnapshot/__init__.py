@@ -11,7 +11,7 @@ from urllib.parse import unquote
 import click
 from pyppeteer import launch
 
-__version__ = '0.1.11'
+__version__ = '0.1.12'
 
 # Символы запрещенные в именах файлов в Linux, Mac и Windows
 UNSAFE_CHARACTERS = re.compile(r'[\\/:*?"<>|]+')
@@ -175,6 +175,7 @@ def print_version(ctx: click.Context, param: click.Option, value: Any) -> None:
     callback=print_version,
     expose_value=False,
     is_eager=True,
+    show_default=False,
 )
 def websnapshot(
     input: TextIO,
